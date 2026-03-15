@@ -3,7 +3,7 @@ library(tidyverse)
 # Wrangle Data ----------------------------------------------------------------
 # Create a list of all the files with the specified path.
 sim_files <- list.files(
-  path = "Simulations/Datasets_CollapsingTruncatedLCA_FreeResp",
+  path = "Simulations/Datasets_CollapsingTruncatedLCA_FreeResp", # path to Sim folder
   full.names = TRUE # Keep full path names
 )
 
@@ -11,20 +11,20 @@ sim_data_list <- list()
 
 for (file in sim_files) { # For every file in the sim_files list
   loaded_names <- load(file) # Load the RData file
-  data <- get(loaded_names[1])
+  data <- get(loaded_names[1]) # Get data for specified file name
   sim_data_list[[file]] <- data # Add the Data to the data list under its file name
 }
 
-sim_data <- bind_rows(sim_data_list) |>
+sim_data <- bind_rows(sim_data_list) |> # Bind all data in the list together
   mutate(
-    across(c(Resp, DIFF), as.factor)
+    across(c(Resp, DIFF), as.factor) # Turn Resp and Diff into factors. Useful for Visualisations.
   )
 
 
 # Data Visualisation ----------------------------------------------------------
 ## Accuracy ------------------------------------------------------------------
 accuracy_data <- sim_data |>
-  mutate(Resp = case_when(
+  mutate(Resp = case_when( # Changing them for Clarity 
     Resp == 1 ~ "correct",
     Resp == 2 ~ "incorrect"
   )) |>
@@ -42,9 +42,14 @@ accuracy_data <- sim_data |>
 ggplot(data = accuracy_data, aes(x = OV, y = accuracy, colour = DIFF)) +
   geom_smooth() +
   geom_point() +
-  ylim(0.4, 1) +
   scale_y_continuous(labels = scales::percent) +
-  theme_minimal()
+  theme_minimal() +
+  labs(
+    title = "Decision Accuracy of Simulations by Magnitude, Differentiated by Alternative Value Difference",
+    x = "Magnitude",
+    y = "Accuracy",
+    colour = "Value Difference"
+  )
 
 ## Response Time --------------------------------------------------------------
 ### Overall Response Time
