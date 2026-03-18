@@ -7,12 +7,17 @@ sim_files <- list.files(
   full.names = TRUE # Keep full path names
 )
 
-sim_data_list <- list()
+sim_data_list <- vector("list", length(sim_files))
 
-for (file in sim_files) { # For every file in the sim_files list
-  loaded_names <- load(file) # Load the RData file
-  data <- get(loaded_names[1]) # Get data for specified file name
-  sim_data_list[[file]] <- data # Add the Data to the data list under its file name
+for (file in sim_files) {
+  loaded_names <- load(file)# Load RData file and retrieve first object as a data frame
+  data <- as.data.frame(get(loaded_names[1]))
+  
+  # Append generated parameters as new columns
+  gen_param_df <- as.data.frame(t(unlist(genParams)))
+  data <- cbind(data, gen_param_df[rep(1, nrow(data)), , drop = FALSE])
+  colnames(data) <- c("Time", "Resp", "OV", "DIFF", names(genParams)) # Assign column names
+  sim_data_list[[file]] <- data # Store in list using file name as key
 }
 
 sim_data <- bind_rows(sim_data_list) |> # Bind all data in the list together
@@ -22,9 +27,9 @@ sim_data <- bind_rows(sim_data_list) |> # Bind all data in the list together
 
 
 # Data Visualisation ----------------------------------------------------------
-## Accuracy ------------------------------------------------------------------
+# Summary Data ----------------------------------------------------------
 accuracy_data <- sim_data |>
-  mutate(Resp = case_when( # Changing them for Clarity 
+  mutate(Resp = case_when( # Changing them for Clarity
     Resp == 1 ~ "correct",
     Resp == 2 ~ "incorrect"
   )) |>
@@ -38,12 +43,15 @@ accuracy_data <- sim_data |>
     values_from = c(Count, mean_rt)
   ) |>
   mutate(accuracy = as.numeric(Count_correct / (Count_correct + Count_incorrect)))
-
+## Accuracy ------------------------------------------------------------------
 ggplot(data = accuracy_data, aes(x = OV, y = accuracy, colour = DIFF)) +
-  geom_smooth() +
+  geom_smooth(method = "loess") +
   geom_point() +
-  scale_y_continuous(labels = scales::percent) +
+  scale_y_continuous(breaks = seq(.5, 1, by = .05), 
+                     labels = scales::percent) +
+  scale_x_continuous(breaks = seq(3, 9, by = 1)) +
   theme_minimal() +
+  guides(colour = (guide_legend(reverse = TRUE))) +
   labs(
     title = "Decision Accuracy of Simulations by Magnitude, Differentiated by Alternative Value Difference",
     x = "Magnitude",
@@ -51,27 +59,26 @@ ggplot(data = accuracy_data, aes(x = OV, y = accuracy, colour = DIFF)) +
     colour = "Value Difference"
   )
 
+ggsave("accuracy_plot.pdf", width = 21, height = 15,
+       units = "cm", path = "~/UoL/Live-DeMo")
+
 ## Response Time --------------------------------------------------------------
-### Overall Response Time
+### Overall Response Time----
 ggplot(data = sim_data, aes(x = OV, y = Time, colour = DIFF)) +
-  geom_smooth(method = lm) +
+  geom_smooth(method = "loess") +
   geom_point() +
   facet_wrap(~Resp) +
   theme_minimal()
 
-### Mean Correct Response Time
+### Mean Correct Response Time----
 ggplot(data = accuracy_data, aes(x = OV, y = mean_rt_correct, colour = DIFF)) +
-         geom_smooth(method = lm) +
-         geom_point() +
-         theme_minimal()
-
-### Mean Error Response Time
-
-ggplot(data = accuracy_data, aes(x = OV, y = mean_rt_correct, colour = DIFF)) +
-  geom_smooth(method = lm) +
+  geom_smooth(method = "loess") +
   geom_point() +
   theme_minimal()
 
-## Ratio Plots ------------------------------------------------------------
-ratio_data <- sim_data |>
-  mutate(ratio = )
+### Mean Error Response Time
+
+ggplot(data = accuracy_data, aes(x = OV, y = mean_rt_incorrect, colour = DIFF)) +
+  geom_smooth(method = "loess") +
+  geom_point() +
+  theme_minimal()
