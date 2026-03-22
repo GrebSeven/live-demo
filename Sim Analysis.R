@@ -18,10 +18,7 @@ for (file in sim_files) {
   sim_data_list[[file]] <- data # Store in list using file name as key
 }
 
-sim_data <- bind_rows(sim_data_list) |> # Bind all data in the list together
-  mutate(
-    across(c(Resp, DIFF), as.factor) # Turn Resp and Diff into factors. Useful for Visualisations.
-  )
+sim_data <- bind_rows(sim_data_list)
 
 
 # Data Visualisation -----------------------------------------------------------
@@ -30,7 +27,8 @@ stimuli_data <- sim_data |>
   mutate(Resp = case_when( # Changing them for Clarity
     Resp == 1 ~ "correct",
     Resp == 2 ~ "incorrect"
-  )) |>
+  ),
+  across(c(Resp, DIFF), as.factor)) |>
   group_by(OV, DIFF, Resp) |>
   summarise(
     Count = n(),
@@ -84,7 +82,7 @@ ggplot(data = stimuli_data, aes(x = OV, y = mean_rt_incorrect, colour = DIFF)) +
 # Parameter Data ---------------------------------------------------------------
 level_labels <- c('low', 'med', 'high')
 
-OV_breaks <- c(3, 5, 7, Inf)
+OV_breaks <- c(seq(min(sim_data$OV), max(sim_data$OV), length.out = 3), Inf)
 
 slope_breaks <- c(seq(min(sim_data$a.slope), max(sim_data$a.slope), length.out = 3), Inf)
 
@@ -93,7 +91,9 @@ beta_breaks <- c(seq(min(sim_data$beta), max(sim_data$beta), length.out = 3), In
 lambda_breaks <- c(seq(min(sim_data$lambda), max(sim_data$lambda), length.out = 3), Inf)
 
 parameter_data <- sim_data |>
+  filter(DIFF != 0) |>
   mutate(
+    across(c(Resp, DIFF), as.factor),
     OV_level      = cut(OV, breaks = OV_breaks, labels = level_labels, ordered_result = TRUE),
     slope_degress = cut(a.slope, breaks = slope_breaks, labels = level_labels, right = FALSE),
     beta_level = cut(beta, breaks = beta_breaks, labels = level_labels, ordered_result = TRUE, right = FALSE),
