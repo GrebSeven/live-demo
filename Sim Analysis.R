@@ -1,4 +1,5 @@
 library(tidyverse)
+library(ggpubr)
 
 # Wrangle Data ----------------------------------------------------------------
 # Create a list of all the files with the specified path.
@@ -88,7 +89,11 @@ ggplot(data = stimuli_data, aes(x = OV, y = mean_rt_incorrect, colour = DIFF)) +
 # Parameter Data ---------------------------------------------------------------
 level_labels <- c("low", "med", "high")
 
+diff_labels <- c("difficult", "medium", "easy")
+
 OV_breaks <- c(seq(min(sim_data$OV), max(sim_data$OV), length.out = 3), Inf)
+
+diff_breaks <- c(seq(min(sim_data$DIFF), max(sim_data$DIFF), length.out = 3), Inf)
 
 slope_breaks <- c(seq(min(sim_data$a.slope), max(sim_data$a.slope), length.out = 3), Inf)
 
@@ -99,19 +104,20 @@ lambda_breaks <- c(seq(min(sim_data$lambda), max(sim_data$lambda), length.out = 
 parameter_data <- sim_data |>
   filter(DIFF != 0) |>
   mutate(
-    across(c(Resp, DIFF), as.factor),
     Resp = case_when( # Changing them for Clarity
       Resp == 1 ~ "correct",
       Resp == 2 ~ "incorrect"
     ),
     OV_level = cut(OV, breaks = OV_breaks, labels = level_labels, ordered_result = TRUE, right = FALSE),
+    diff_level = cut(DIFF, breaks = diff_breaks, labels = diff_labels, ordered_result = TRUE, right = FALSE),
     slope_degrees = cut(a.slope, breaks = slope_breaks, labels = level_labels, right = FALSE),
     beta_level = cut(beta, breaks = beta_breaks, labels = level_labels, ordered_result = TRUE, right = FALSE),
-    lambda_level = cut(lambda, breaks = lambda_breaks, labels = level_labels, ordered_result = TRUE, right = FALSE)
+    lambda_level = cut(lambda, breaks = lambda_breaks, labels = level_labels, ordered_result = TRUE, right = FALSE),
+    across(c(Resp, DIFF), as.factor),
   )
 
 beta_lambda_data <- parameter_data |>
-  group_by(beta_level, lambda_level, OV, OV_level, Resp) |>
+  group_by(beta_level, lambda_level, OV, OV_level, diff_level, Resp) |>
   summarise(
     count = n(),
     mean_rt = mean(Time)
@@ -134,8 +140,22 @@ ggplot(parameter_data, aes(y = Time, x = beta_level, colour = OV_level)) +
   geom_boxplot(outliers = FALSE) +
   facet_wrap(~lambda_level)
 
-ggplot(beta_lambda_data, aes(x = OV, y = accuracy, colour = beta_level:lambda_level)) +
-  geom_smooth()
+PLOT_acc_beta_lambda <-
+  ggplot(beta_lambda_data, aes(x = OV, y = accuracy, colour = beta_level:lambda_level)) +
+    geom_smooth() +
+    facet_wrap(~diff_level)
 
-ggplot(beta_lambda_data, aes(x = OV, y = ratio, colour = beta_level:lambda_level)) +
-  geom_smooth()
+
+PLOT_rt_beta_lambda <-
+  ggplot(beta_lambda_data, aes(x = OV, y = mean_rt, colour = beta_level:lambda_level)) +
+    geom_smooth() +
+    facet_wrap(~diff_level)
+
+PLOT_ratio_beta_lambda <-
+  ggplot(beta_lambda_data, aes(x = OV, y = ratio, colour = beta_level:lambda_level)) +
+    geom_smooth()+
+  facet_wrap(~diff_level)
+
+ggarrange(PLOT_acc_beta_lambda, PLOT_rt_beta_lambda,
+          labels = c("Accuracy", "Response Time", "Speed Accuracy Trade-off"),
+          ncol = 1, nrow = 3)
