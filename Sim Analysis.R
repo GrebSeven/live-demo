@@ -64,7 +64,7 @@ ggplot(data = stimuli_data, aes(x = OV, y = accuracy, colour = DIFF)) +
     colour = "Value Difference"
   )
 ## Response Time Plots ---------------------------------------------------------------
-### Overall Response Time PLot----
+### Overall Response Time Plot----
 ggplot(data = stimuli_data, aes(x = OV, y = mean_rt, colour = DIFF)) +
   geom_smooth(method = "loess") +
   geom_point() +
