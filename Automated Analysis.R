@@ -58,11 +58,13 @@ stimuli_summary <- function(rds_path) {
       values_from = c(count, mean_rt)
     ) |>
     mutate(
-      count_correct = if("count_correct" %in% names(.)) count_correct else 0,
-      count_incorrect = if("count_incorrect" %in% names(.)) count_incorrect else 0,
-      count_none = if("count_none" %in% names(.)) count_none else 0,
+      count_correct = if("count_correct" %in% names(pick(everything()))) count_correct else 0,
+      count_incorrect = if("count_incorrect" %in% names(pick(everything()))) count_incorrect else 0,
+      count_none = if("count_none" %in% names(pick(everything()))) count_none else 0,
+      mean_rt_correct = if("mean_rt_correct" %in% names(pick(everything()))) mean_rt_correct else 0,
+      mean_rt_incorrect = if("mean_rt_incorrect" %in% names(pick(everything()))) mean_rt_incorrect else 0,
       total_count = count_correct + count_incorrect + count_none,
-      accuracy = as.numeric(count_correct / (count_correct + count_incorrect)),
+      accuracy = as.numeric(count_correct / (total_count)),
       mean_rt = (mean_rt_correct * (count_correct / total_count)) +
         (mean_rt_incorrect * (count_incorrect / total_count))
     )
