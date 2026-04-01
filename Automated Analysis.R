@@ -1,18 +1,16 @@
-dir_paths <- list.dirs(path = "Simulations", full.names = FALSE, recursive = TRUE)
+dir_paths <- list.dirs(path = "Simulations", full.names = TRUE, recursive = FALSE)
+
+dir.create(file.path("Analyses"), recursive = FALSE, showWarnings = FALSE)
 
 for (i in dir_paths) {
   dir_name <- basename(i)
-  
-  dir.create(file.path("Analyses", dir_name), recursive = FALSE, showWarnings = FALSE)
-  
+
   sim_files <- vector("list")
   
   sim_files <- list.files(
     path = i,
     full.names = TRUE
   )
-  
-  sim_data_list <- vector("list")
   
   for (file in sim_files) {
     loaded_names <- load(file) # Load RData file
@@ -22,7 +20,12 @@ for (i in dir_paths) {
     colnames(data) <- c("Time", "Resp", "OV", "DIFF", names(genParams)) # Assign column names
     sim_data_list[[file]] <- data # Store in list using file name as key
   }
-  sim_data <- vector("list")
   
   sim_data <- bind_rows(sim_data_list)
+  
+  saveRDS(sim_data, file = file.path("Analyses", paste0(dir_name, "_sim_data.rds")))
+  
+  rm(sim_data, sim_data_list)
+  
+  gc()
 }
