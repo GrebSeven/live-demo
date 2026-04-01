@@ -14,7 +14,7 @@ for (file in sim_files) {
   loaded_names <- load(file) # Load RData file
   data <- as.data.frame(get(loaded_names[1])) # retrieve first object as a data frame
   gen_param_df <- as.data.frame(t(genParams)) # Append genparams as new columns
-  data <- cbind(data, gen_param_df[rep(1, nrow(data)), , drop = FALSE])
+  data <- cbind(data, gen_param_df[rep(1, nrow(data)), , drop = FALSE]) #bind param data, repeating through all data points.
   colnames(data) <- c("Time", "Resp", "OV", "DIFF", names(genParams)) # Assign column names
   sim_data_list[[file]] <- data # Store in list using file name as key
 }
@@ -46,7 +46,8 @@ stimuli_data <- sim_data |>
          mean_rt = (mean_rt_correct * (count_correct / total_count)) +
            (mean_rt_incorrect * (count_incorrect / total_count)))
 ## Accuracy Plots ------------------------------------------------------------------
-ggplot(data = stimuli_data, aes(x = OV, y = accuracy, colour = DIFF)) +
+PLOT_acc <-
+  ggplot(data = stimuli_data, aes(x = OV, y = accuracy, colour = DIFF)) +
   geom_smooth(method = "loess") +
   geom_point() +
   scale_y_continuous(
@@ -63,9 +64,12 @@ ggplot(data = stimuli_data, aes(x = OV, y = accuracy, colour = DIFF)) +
     y = "Accuracy",
     colour = "Value Difference"
   )
+
+PLOT_acc
 ## Response Time Plots ---------------------------------------------------------------
 ### Overall Response Time Plot----
-ggplot(data = stimuli_data, aes(x = OV, y = mean_rt, colour = DIFF)) +
+PLOT_rt <-
+  ggplot(data = stimuli_data, aes(x = OV, y = mean_rt, colour = DIFF)) +
   geom_smooth(method = "loess") +
   geom_point() +
   scale_x_continuous(breaks = seq(3, 9, by = 1)) +
@@ -78,8 +82,10 @@ ggplot(data = stimuli_data, aes(x = OV, y = mean_rt, colour = DIFF)) +
     colour = "Value Difference"
   )
 
+PLOT_rt
 ### Mean Correct Response Time Plot----
-ggplot(data = stimuli_data, aes(x = OV, y = mean_rt_correct, colour = DIFF)) +
+PLOT_mcrt <-
+  ggplot(data = stimuli_data, aes(x = OV, y = mean_rt_correct, colour = DIFF)) +
   geom_smooth(method = "loess") +
   geom_point() +
   scale_x_continuous(breaks = seq(3, 9, by = 1)) +
@@ -92,9 +98,10 @@ ggplot(data = stimuli_data, aes(x = OV, y = mean_rt_correct, colour = DIFF)) +
     colour = "Value Difference"
   )
 
+PLOT_mcrt
 ### Mean Error Response Time
-
-ggplot(data = stimuli_data, aes(x = OV, y = mean_rt_incorrect, colour = DIFF)) +
+PLOT_mert<-
+  ggplot(data = stimuli_data, aes(x = OV, y = mean_rt_incorrect, colour = DIFF)) +
   geom_smooth(method = "loess") +
   geom_point() +
   scale_x_continuous(breaks = seq(3, 9, by = 1)) +
@@ -107,6 +114,7 @@ ggplot(data = stimuli_data, aes(x = OV, y = mean_rt_incorrect, colour = DIFF)) +
     colour = "Value Difference"
   )
 
+PLOT_mert
 # Parameter Data ---------------------------------------------------------------
 level_labels <- c("low", "med", "high")
 
@@ -165,7 +173,7 @@ beta_lambda_data <- parameter_data |>
 
 PLOT_acc_beta_lambda <-
   ggplot(beta_lambda_data, aes(x = OV, y = accuracy, colour = beta_level:lambda_level)) +
-    geom_smooth() +
+    geom_smooth(method = "loess") +
     facet_wrap(~diff_level,
                axes = "all",
                labeller = as_labeller(
@@ -192,7 +200,7 @@ PLOT_acc_beta_lambda
 
 PLOT_rt_beta_lambda <-
   ggplot(beta_lambda_data, aes(x = OV, y = mean_rt, colour = beta_level:lambda_level)) +
-    geom_smooth() +
+    geom_smooth(method = "loess") +
     facet_wrap(~diff_level,
                axes = "all",
                labeller = as_labeller(
