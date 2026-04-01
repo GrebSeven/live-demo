@@ -1,16 +1,20 @@
+library(tidyverse)
+# Read in Data ---------------------------------------------------------------
 dir_paths <- list.dirs(path = "Simulations", full.names = TRUE, recursive = FALSE)
 
-dir.create(file.path("Analyses"), recursive = FALSE, showWarnings = FALSE)
+dir.create("Analyses/Data", recursive = TRUE, showWarnings = FALSE)
+dir.create("Analyses/Summaries", recursive = TRUE, showWarnings = FALSE)
+dir.create("Analyses/Plots", recursive = TRUE, showWarnings = FALSE)
 
 for (i in dir_paths) {
   dir_name <- basename(i)
-
-  sim_files <- vector("list")
   
   sim_files <- list.files(
     path = i,
     full.names = TRUE
   )
+  
+  sim_data_list <- vector("list")
   
   for (file in sim_files) {
     loaded_names <- load(file) # Load RData file
@@ -23,9 +27,53 @@ for (i in dir_paths) {
   
   sim_data <- bind_rows(sim_data_list)
   
-  saveRDS(sim_data, file = file.path("Analyses", paste0(dir_name, "_sim_data.rds")))
+  saveRDS(sim_data, file = file.path("Analyses/Data", paste0(dir_name, "_sim_data.rds"))) #Create a unique RDS file for each Sim Type
   
   rm(sim_data, sim_data_list)
   
   gc()
+}
+
+# Summarising Data -------------------------------------------------------------
+
+stimuli_summary <- function(rds_path) {
+  sim_data <- readRDS(rds_path)
+  
+  stimuli_data <- sim_data |>
+    mutate(
+      Resp = case_when( # Changing them for Clarity
+        Resp == 1 ~ "correct",
+        Resp == 2 ~ "incorrect"
+      ),
+      across(c(Resp, DIFF), as.factor)
+    ) |>
+    group_by(OV, DIFF, Resp) |>
+    summarise(
+      count = n(),
+      mean_rt = mean(Time)
+    ) |>
+    pivot_wider(
+      names_from = Resp,
+      values_from = c(count, mean_rt)
+    ) |>
+    mutate(
+      total_count = count_correct + count_incorrect,
+      accuracy = as.numeric(count_correct / (count_correct + count_incorrect)),
+      mean_rt = (mean_rt_correct * (count_correct / total_count)) +
+        (mean_rt_incorrect * (count_incorrect / total_count))
+    )
+  
+  stim_summary_path <- gsub("_sim_data.rds", "_stim_summary.rds", basename(rds_path))
+  
+  saveRDS(stimuli_data, file = file.path("Analyses/Summaries", stim_summary_path))
+  
+  rm(sim_data)
+  
+  gc()
+}
+
+rds_paths <- list.files(path = "Analyses/Data", pattern = "_sim_data.rds", full.names = TRUE)
+
+for (path in rds_paths) {
+  stimuli_summary(path)
 }
