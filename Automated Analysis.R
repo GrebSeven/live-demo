@@ -43,7 +43,8 @@ stimuli_summary <- function(rds_path) {
     mutate(
       Resp = case_when( # Changing them for Clarity
         Resp == 1 ~ "correct",
-        Resp == 2 ~ "incorrect"
+        Resp == 2 ~ "incorrect",
+        Resp == -1 ~ "none"
       ),
       across(c(Resp, DIFF), as.factor)
     ) |>
@@ -57,7 +58,10 @@ stimuli_summary <- function(rds_path) {
       values_from = c(count, mean_rt)
     ) |>
     mutate(
-      total_count = count_correct + count_incorrect,
+      count_correct = if("count_correct" %in% names(.)) count_correct else 0,
+      count_incorrect = if("count_incorrect" %in% names(.)) count_incorrect else 0,
+      count_none = if("count_none" %in% names(.)) count_none else 0,
+      total_count = count_correct + count_incorrect + count_none,
       accuracy = as.numeric(count_correct / (count_correct + count_incorrect)),
       mean_rt = (mean_rt_correct * (count_correct / total_count)) +
         (mean_rt_incorrect * (count_incorrect / total_count))
