@@ -72,10 +72,6 @@ stimuli_summary <- function(rds_path) {
   stim_summary_path <- gsub("_sim_data.rds", "_stim_summary.rds", basename(rds_path))
   
   saveRDS(stimuli_data, file = file.path("Analyses/Summaries", stim_summary_path))
-  
-  rm(sim_data)
-  
-  gc()
 }
 
 rds_paths <- list.files(path = "Analyses/Data", pattern = "_sim_data.rds", full.names = TRUE)

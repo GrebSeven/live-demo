@@ -14,7 +14,7 @@ for (file in sim_files) {
   loaded_names <- load(file) # Load RData file
   data <- as.data.frame(get(loaded_names[1])) # retrieve first object as a data frame
   gen_param_df <- as.data.frame(t(genParams)) # Append genparams as new columns
-  data <- cbind(data, gen_param_df[rep(1, nrow(data)), , drop = FALSE]) #bind param data, repeating through all data points.
+  data <- cbind(data, gen_param_df[rep(1, nrow(data)), , drop = FALSE]) # bind param data, repeating through all data points.
   colnames(data) <- c("Time", "Resp", "OV", "DIFF", names(genParams)) # Assign column names
   sim_data_list[[file]] <- data # Store in list using file name as key
 }
@@ -41,10 +41,12 @@ stimuli_data <- sim_data |>
     names_from = Resp,
     values_from = c(count, mean_rt)
   ) |>
-  mutate(total_count = count_correct + count_incorrect,
-         accuracy = as.numeric(count_correct / (count_correct + count_incorrect)),
-         mean_rt = (mean_rt_correct * (count_correct / total_count)) +
-           (mean_rt_incorrect * (count_incorrect / total_count)))
+  mutate(
+    total_count = count_correct + count_incorrect,
+    accuracy = as.numeric(count_correct / (count_correct + count_incorrect)),
+    mean_rt = (mean_rt_correct * (count_correct / total_count)) +
+      (mean_rt_incorrect * (count_incorrect / total_count))
+  )
 ## Accuracy Plots ------------------------------------------------------------------
 PLOT_acc <-
   ggplot(data = stimuli_data, aes(x = OV, y = accuracy, colour = DIFF)) +
@@ -89,7 +91,7 @@ PLOT_mcrt <-
   geom_smooth(method = "loess") +
   geom_point() +
   scale_x_continuous(breaks = seq(3, 9, by = 1)) +
-  theme_minimal()+
+  theme_minimal() +
   labs(
     title = "Simulation Mean Correct Response Time by Magnitude",
     subtitle = "Coloured by Alternative Value Difference",
@@ -100,12 +102,12 @@ PLOT_mcrt <-
 
 PLOT_mcrt
 ### Mean Error Response Time
-PLOT_mert<-
+PLOT_mert <-
   ggplot(data = stimuli_data, aes(x = OV, y = mean_rt_incorrect, colour = DIFF)) +
   geom_smooth(method = "loess") +
   geom_point() +
   scale_x_continuous(breaks = seq(3, 9, by = 1)) +
-  theme_minimal()+
+  theme_minimal() +
   labs(
     title = "Simulation Mean Incorrect Response Time by Magnitude",
     subtitle = "Coloured by Alternative Value Difference",
@@ -141,8 +143,8 @@ parameter_data <- sim_data |>
     OV_level = cut(OV, breaks = OV_breaks, labels = level_labels, ordered_result = TRUE, right = FALSE),
     diff_level = case_when(
       DIFF == 0 ~ "equal",
-      TRUE ~ as.character(cut(DIFF, breaks = diff_breaks, labels = diff_labels, ordered_result = TRUE, right = FALSE)
-    )) |>
+      TRUE ~ as.character(cut(DIFF, breaks = diff_breaks, labels = diff_labels, ordered_result = TRUE, right = FALSE))
+    ) |>
       factor(levels = c("equal", diff_labels), ordered = TRUE),
     threshold_level = cut(a.intercept, breaks = threshold_breaks, labels = level_labels, ordered_result = TRUE, right = FALSE),
     collapse_rate = cut(a.slope, breaks = slope_breaks, labels = level_labels, ordered_result = TRUE, right = FALSE),
@@ -173,15 +175,18 @@ beta_lambda_data <- parameter_data |>
 
 PLOT_acc_beta_lambda <-
   ggplot(beta_lambda_data, aes(x = OV, y = accuracy, colour = beta_level:lambda_level)) +
-    geom_smooth(method = "loess") +
-    facet_wrap(~diff_level,
-               axes = "all",
-               labeller = as_labeller(
-                 c(equal = "Equal Values",
-                   difficult = "Difficult (Close Values)",
-                   medium = "Medium",
-                   easy = "Easy (Far Values)"
-               ))) +
+  geom_smooth(method = "loess") +
+  facet_wrap(~diff_level,
+    axes = "all",
+    labeller = as_labeller(
+      c(
+        equal = "Equal Values",
+        difficult = "Difficult (Close Values)",
+        medium = "Medium",
+        easy = "Easy (Far Values)"
+      )
+    )
+  ) +
   scale_y_continuous(
     breaks = seq(.4, 1, by = .1),
     labels = scales::percent
@@ -200,48 +205,60 @@ PLOT_acc_beta_lambda
 
 PLOT_rt_beta_lambda <-
   ggplot(beta_lambda_data, aes(x = OV, y = mean_rt, colour = beta_level:lambda_level)) +
-    geom_smooth(method = "loess") +
-    facet_wrap(~diff_level,
-               axes = "all",
-               labeller = as_labeller(
-                 c(equal = "Equal Values",
-                   difficult = "Difficult (Close Values)",
-                   medium = "Medium",
-                   easy = "Easy (Far Values)"
-                 ))) +
+  geom_smooth(method = "loess") +
+  facet_wrap(~diff_level,
+    axes = "all",
+    labeller = as_labeller(
+      c(
+        equal = "Equal Values",
+        difficult = "Difficult (Close Values)",
+        medium = "Medium",
+        easy = "Easy (Far Values)"
+      )
+    )
+  ) +
   scale_y_continuous(
     breaks = seq(.2, 3, by = 0.2)
-  )+
+  ) +
   scale_x_continuous(breaks = seq(3, 9, by = 1)) +
   theme_minimal() +
-  labs(title = "Mean Simulation Response Time by Decision Magnitude",
-       subtitle = "Coloured by Beta:Lambda Levels, Faceted by Decision Difficulty",
-       x = "Magnitude",
-       y = "Mean Response Time (Seconds)",
-       colour = "Beta Level:Lambda Level"
-       )
-  
+  labs(
+    title = "Mean Simulation Response Time by Decision Magnitude",
+    subtitle = "Coloured by Beta:Lambda Levels, Faceted by Decision Difficulty",
+    x = "Magnitude",
+    y = "Mean Response Time (Seconds)",
+    colour = "Beta Level:Lambda Level"
+  )
+
 PLOT_rt_beta_lambda
 
 ## Threshold Plots----
 
 PLOT_acc_thresholds <-
-  ggplot(data = beta_lambda_data, aes(x = OV,y = accuracy, colour = threshold_level:collapse_rate)) +
-  geom_smooth(method = "loess",
-              se = FALSE) +
-  facet_grid(rows = vars(beta_level),
-             cols = vars(lambda_level),
-             scales = "fixed",
-             axes = "all",
-             labeller = labeller(.rows = as_labeller(
-               c(low = "Low Leak",
-                 med = "Medium Leak",
-                 high = "High Leak")
-             ), .cols = as_labeller(
-               c(low = "Low Inhibition",
-                 med = "Medium Inhibition",
-                 high = "High Inhibiiton")
-             ))) +
+  ggplot(data = beta_lambda_data, aes(x = OV, y = accuracy, colour = threshold_level:collapse_rate)) +
+  geom_smooth(
+    method = "loess",
+    se = FALSE
+  ) +
+  facet_grid(
+    rows = vars(beta_level),
+    cols = vars(lambda_level),
+    scales = "fixed",
+    axes = "all",
+    labeller = labeller(.rows = as_labeller(
+      c(
+        low = "Low Leak",
+        med = "Medium Leak",
+        high = "High Leak"
+      )
+    ), .cols = as_labeller(
+      c(
+        low = "Low Inhibition",
+        med = "Medium Inhibition",
+        high = "High Inhibiiton"
+      )
+    ))
+  ) +
   scale_x_continuous(breaks = seq(3, 9, by = 1)) +
   scale_y_continuous(
     breaks = seq(.4, 1, by = .05),
@@ -259,21 +276,30 @@ PLOT_acc_thresholds <-
 PLOT_acc_thresholds
 
 PLOT_rt_thresholds <-
-  ggplot(data = beta_lambda_data, aes(x = OV,y = mean_rt, colour = threshold_level:collapse_rate)) +
-  geom_smooth(method = "loess",
-              se = FALSE) +
-  facet_grid(rows = vars(beta_level),
-             cols = vars(lambda_level),
-             scales = "fixed",
-             axes = "all",
-             labeller = labeller(.rows = as_labeller(
-               c(low = "Low Leak",
-                 med = "Medium Leak",
-                 high = "High Leak")
-             ), .cols = as_labeller(
-               c(low = "Low Inhibition",
-                 med = "Medium Inhibition",
-                 high = "High Inhibition")))) +
+  ggplot(data = beta_lambda_data, aes(x = OV, y = mean_rt, colour = threshold_level:collapse_rate)) +
+  geom_smooth(
+    method = "loess",
+    se = FALSE
+  ) +
+  facet_grid(
+    rows = vars(beta_level),
+    cols = vars(lambda_level),
+    scales = "fixed",
+    axes = "all",
+    labeller = labeller(.rows = as_labeller(
+      c(
+        low = "Low Leak",
+        med = "Medium Leak",
+        high = "High Leak"
+      )
+    ), .cols = as_labeller(
+      c(
+        low = "Low Inhibition",
+        med = "Medium Inhibition",
+        high = "High Inhibition"
+      )
+    ))
+  ) +
   scale_x_continuous(breaks = seq(3, 9, by = 1)) +
   theme_minimal() +
   labs(

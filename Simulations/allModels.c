@@ -17,7 +17,7 @@ int *rangeLow, int *rangeHigh, double *randomTable)
 {
   int numRespAlt = (int) *nRespAlt;
   double oldx[numRespAlt],keepArray,x[numRespAlt],randNum,isResp,v[numRespAlt];
-  int N,i,iter,Maxiter,j,blah,k,index,trunc,interro,FFI;
+  int N,i,iter,Maxiter,j,blah,k,index,trunc,interro,FFI,whichMax;
   
   N=(int) *n;
   Maxiter =(int) *maxiter;
@@ -131,6 +131,18 @@ int *rangeLow, int *rangeHigh, double *randomTable)
     }
 
 } while (iter<Maxiter & isResp==0) ; 
+    if (interro==1) {
+      resp[i]=(double) 1;
+      whichMax=(int) 0;
+      for (j=1;j<numRespAlt;j++) {
+        if (x[j]>x[whichMax]) {
+          resp[i]=(double) (j+1) ; 
+          whichMax=(int) j;
+        } else if (x[j]==x[whichMax]) {
+          resp[i]=(double) -1.0 ;
+        }
+      }
+    }
 rt[i]=((double) iter)*(*h) - (*h)/((double) 2.0);
   }
 PutRNGstate();
