@@ -1,17 +1,17 @@
 
 rm(list=ls())
 
-howManyCores = 3 # number of cores to use for the simulations. 
+howManyCores = 60 # number of cores to use for the simulations. 
 
-folderName="Datasets_CollapsingNoTruncatedLCA_freeResp" #Change this to change the folder where info about the simulations is saved. Use a different folder name for each set of simulations you want to run, for example, if you wanted to run another set of simulations with no leakage, you could set folderName="Datasets_CollapsingTruncatedLCA_FreeResp_NoLeak" or something like that.
+folderName="Large_Datasets_CollapsingTruncatedLCA_freeResp" #Change this to change the folder where info about the simulations is saved. Use a different folder name for each set of simulations you want to run, for example, if you wanted to run another set of simulations with no leakage, you could set folderName="Datasets_CollapsingTruncatedLCA_FreeResp_NoLeak" or something like that.
 
-freeRespOrInterrogation=c("freeResp","interrogation") [2] # FR or I
+freeRespOrInterrogation=c("freeResp","interrogation") [1] # FR or I
 fixedOrCollapseThresholds=c("fixed","linearCollapse") [2] # F or LC
 inhibition=c("none","lateral","FFI") [2] #N or LI or FFI
 leakage=c("leak","noLeak") [1] # L or NL
-truncAtZero=c("trunc","noTrunc") [2] # T or NT
+truncAtZero=c("trunc","noTrunc") [1] # T or NT
 
-nSim=40 # number of simulations, will be bigger for the actual simulations, but set to 10 here for testing purposes.
+nSim= 2000 # number of simulations, will be bigger for the actual simulations, but set to 10 here for testing purposes.
 
 nTrials=10000 # number of trials, could increase this for the actual simulations, but set to 10000 here for testing purposes.
 maxCounter=2000 # number of time steps to simulate for. If a response is not made by the end of the time steps, then that trial is ended and marked as a non-response.
