@@ -1,6 +1,6 @@
 library(tidyverse)
 # Read in Data ---------------------------------------------------------------
-dir_paths <- list.dirs(path = "Simulations", full.names = TRUE, recursive = FALSE)
+dir_paths <- list.dirs(path = "~/Blake/Simulations", full.names = TRUE, recursive = FALSE)
 
 dir.create("Analyses/Data", recursive = TRUE, showWarnings = FALSE)
 dir.create("Analyses/Summaries", recursive = TRUE, showWarnings = FALSE)
