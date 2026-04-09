@@ -1,3 +1,5 @@
+# How Many Cores ?!?!?!?!?!!
+how_many_cores = 3
 # Load in Packages (Should be loaded if read has just taken place) -----------------------------------------
 library(tidyverse)
 library(parallel)
@@ -123,6 +125,4 @@ create_summaries <- function(rds_path) {
 ## Making lost of all simulation dataframes within specified path
 rds_paths <- list.files(path = "Analyses/Data", pattern = "_sim_data.rds", full.names = TRUE)
 
-for (path in rds_paths) {
-  stimuli_summary(path)
-}
+mclapply(rds_paths, create_summaries, mc.cores = how_many_cores)
