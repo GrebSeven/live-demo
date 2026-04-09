@@ -175,7 +175,8 @@ beta_lambda_data <- parameter_data |>
 
 PLOT_acc_beta_lambda <-
   ggplot(beta_lambda_data, aes(x = OV, y = accuracy, colour = beta_level:lambda_level)) +
-  geom_smooth(method = "loess") +
+  geom_smooth(method = "loess",
+              se = FALSE) +
   facet_wrap(~diff_level,
     axes = "all",
     labeller = as_labeller(
@@ -205,7 +206,8 @@ PLOT_acc_beta_lambda
 
 PLOT_rt_beta_lambda <-
   ggplot(beta_lambda_data, aes(x = OV, y = mean_rt, colour = beta_level:lambda_level)) +
-  geom_smooth(method = "loess") +
+  geom_smooth(method = "loess",
+              se = FALSE) +
   facet_wrap(~diff_level,
     axes = "all",
     labeller = as_labeller(
@@ -247,15 +249,15 @@ PLOT_acc_thresholds <-
     axes = "all",
     labeller = labeller(.rows = as_labeller(
       c(
-        low = "Low Leak",
-        med = "Medium Leak",
-        high = "High Leak"
+        low = "Low Inhibition",
+        med = "Medium Inhibition",
+        high = "High Inhibition"
       )
     ), .cols = as_labeller(
       c(
-        low = "Low Inhibition",
-        med = "Medium Inhibition",
-        high = "High Inhibiiton"
+        low = "Low Leak",
+        med = "Medium Leak",
+        high = "High Leak"
       )
     ))
   ) +
@@ -288,15 +290,15 @@ PLOT_rt_thresholds <-
     axes = "all",
     labeller = labeller(.rows = as_labeller(
       c(
-        low = "Low Leak",
-        med = "Medium Leak",
-        high = "High Leak"
-      )
-    ), .cols = as_labeller(
-      c(
         low = "Low Inhibition",
         med = "Medium Inhibition",
         high = "High Inhibition"
+      )
+    ), .cols = as_labeller(
+      c(
+        low = "Low Leak",
+        med = "Medium Leak",
+        high = "High Leak"
       )
     ))
   ) +
