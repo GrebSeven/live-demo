@@ -1,4 +1,20 @@
-.Rproj.user
+﻿.Rproj.user
 .Rhistory
 .RData
 .Ruserdata
+
+# Ignore everything in Simulations/ 
+Simulations/** 
+# Un-ignore directories so Git can traverse into them 
+
+!Simulations/**/ 
+
+# But keep .c, .so, .o, and .R files 
+
+!Simulations/**/*.c 
+!Simulations/**/*.so 
+!Simulations/**/*.o 
+!Simulations/**/*.R 
+
+# Ignore Analyses/Data 
+Analyses/Data/**
