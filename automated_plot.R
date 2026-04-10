@@ -1,6 +1,6 @@
 # SET HOW MNAY CORES TO USE!!!!! ----------------------------------
 
-how_many_cores = 3
+how_many_cores <- 3
 
 # Load in Packages--------------------------------------
 library(tidyverse)
