@@ -13,6 +13,7 @@ make_breaks <- function(parameter){
 compute_summary_stats <- function(df) {
   df |>
     mutate(
+      count_none = if("count_none" %in% names(.)) count_none else NA, # Need this because in some simulations it always reaches an answer. Stops errors being thrown.
       count_correct = replace_na(count_correct, 0),
       count_incorrect = replace_na(count_incorrect, 0),
       count_none = replace_na(count_none, 0),
@@ -28,6 +29,7 @@ compute_summary_stats <- function(df) {
 # Define Summary function ---------------------------------------------------
 ## Summary for different Stimuli matchups
 create_summaries <- function(rds_path) {
+  
   ### Read in data
   sim_data <- readRDS(rds_path)
   
@@ -53,7 +55,7 @@ create_summaries <- function(rds_path) {
     pivot_wider(
       names_from = Resp,
       values_from = c(count, mean_rt)
-    ) |>
+    )|>
     compute_summary_stats()
   ### Save stimuli summary as an RDS file, at this location, under this name,
   saveRDS(stimuli_summary, file = file.path("Analyses/Summaries", stim_summary_filename))
