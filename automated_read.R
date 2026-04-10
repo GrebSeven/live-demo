@@ -1,5 +1,5 @@
 # Set How Many Cores to USE!!!!!!!!!!!!!!!!!!!!!!! ---------------------------
-how_many_cores <- 3
+how_many_cores <- 100
 # Load in Packages ---------------------------------------------------------
 
 library(tidyverse)
@@ -34,7 +34,9 @@ for (i in dir_paths) {
     path = i,
     full.names = TRUE
   )
-
+  
+  sim_data_list <- vector("list")
+  
   sim_data_list <- mclapply(sim_files, sim_load, mc.cores = how_many_cores)
 
   sim_data <- bind_rows(sim_data_list)
