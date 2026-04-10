@@ -1,19 +1,19 @@
 # How Many Cores ?!?!?!?!?!!
-how_many_cores = 3
+how_many_cores <- 3
 # Load in Packages (Should be loaded if read has just taken place) -----------------------------------------
 library(tidyverse)
 library(parallel)
 
 ## Defining functions for later
 
-make_breaks <- function(parameter){
+make_breaks <- function(parameter) {
   c(seq(min(parameter), max(parameter), length.out = 3), Inf)
 }
 
 compute_summary_stats <- function(df) {
   df |>
     mutate(
-      count_none = if("count_none" %in% names(.)) count_none else NA, # Need this because in some simulations it always reaches an answer. Stops errors being thrown.
+      count_none = if ("count_none" %in% names(.)) count_none else NA, # Need this because in some simulations it always reaches an answer. Stops errors being thrown.
       count_correct = replace_na(count_correct, 0),
       count_incorrect = replace_na(count_incorrect, 0),
       count_none = replace_na(count_none, 0),
@@ -29,14 +29,13 @@ compute_summary_stats <- function(df) {
 # Define Summary function ---------------------------------------------------
 ## Summary for different Stimuli matchups
 create_summaries <- function(rds_path) {
-  
   ### Read in data
   sim_data <- readRDS(rds_path)
-  
+
   ### Create names for summaries files
   stim_summary_filename <- gsub("_sim_data.rds", "_stim_summary.rds", basename(rds_path))
   param_summary_filename <- gsub("_sim_data.rds", "_param_summary.rds", basename((rds_path)))
-  
+
   ### Stimuli Summary ======
   stimuli_summary <- sim_data |>
     mutate(
@@ -55,30 +54,30 @@ create_summaries <- function(rds_path) {
     pivot_wider(
       names_from = Resp,
       values_from = c(count, mean_rt)
-    )|>
+    ) |>
     compute_summary_stats()
   ### Save stimuli summary as an RDS file, at this location, under this name,
   saveRDS(stimuli_summary, file = file.path("Analyses/Summaries", stim_summary_filename))
-  
+
   ### Parameter Summary =======
-  
+
   #### Create breaks for Levels
   level_labels <- c("low", "med", "high")
-  
+
   diff_labels <- c("difficult", "medium", "easy")
-  
+
   OV_breaks <- make_breaks(sim_data$OV)
-  
+
   diff_breaks <- make_breaks(sim_data$DIFF[sim_data$DIFF != 0]) # Want it to ignore 0 as this is a separate case
-  
+
   threshold_breaks <- make_breaks(sim_data$a.intercept)
-  
+
   slope_breaks <- make_breaks(sim_data$a.slope)
-  
+
   beta_breaks <- make_breaks(sim_data$beta)
-  
+
   lambda_breaks <- make_breaks(sim_data$lambda)
-  
+
   #### Create Parameter Level Dataframe
   parameter_summary <- sim_data |>
     mutate(
