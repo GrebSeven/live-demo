@@ -21,17 +21,18 @@ sim_load <- function(file) {
   gen_param_df <- as.data.frame(t(genParams)) # Append genparams as new columns
   data <- cbind(data, gen_param_df[rep(1, nrow(data)), , drop = FALSE]) # bind param data, repeating through all data points.
   colnames(data) <- c("Time", "Resp", "OV", "DIFF", names(genParams)) # Assign column names
+  return(data)
 }
 
 ## List directories containing Simulations
 dir_paths <- list.dirs(path = "~/Blake/Simulations", full.names = TRUE, recursive = FALSE)
 
 ## Create data frame for each simulation set in the directory paths lists
-for (i in dir_paths) {
-  dir_name <- basename(i)
+for (dir in dir_paths) {
+  dir_name <- basename(dir)
 
   sim_files <- list.files(
-    path = i,
+    path = dir,
     full.names = TRUE
   )
   
