@@ -142,7 +142,7 @@ plot_parameters <- function(param_sum_path) {
       colour = "Beta Level:Lambda Level"
     )
   
-  PLOT_BL_acc_name <- gsub("_stim_summary\\.rds", "_PLOT_Beta:Lambda_acc.png", summary_name)
+  PLOT_BL_acc_name <- gsub("_param_summary\\.rds", "_PLOT_Beta_Lambda_acc.png", summary_name)
   
   ggsave(PLOT_BL_acc_name, plot = PLOT_acc_beta_lambda, path = "Analyses/Plots")
   
@@ -176,7 +176,7 @@ plot_parameters <- function(param_sum_path) {
       colour = "Beta Level:Lambda Level"
     )
   
-  PLOT_BL_RT_name <- gsub("_stim_summary\\.rds", "_PLOT_Beta:Lambda_RT.png", summary_name)
+  PLOT_BL_RT_name <- gsub("_param_summary\\.rds", "_PLOT_Beta_Lambda_RT.png", summary_name)
   
   ggsave(PLOT_BL_RT_name, plot = PLOT_rt_beta_lambda, path = "Analyses/Plots")
   ## Plot Threshold Accuracy =====
@@ -220,7 +220,7 @@ plot_parameters <- function(param_sum_path) {
       colour = "Threshold:Collapse Rate"
     )
   
-  PLOT_threshold_acc_name <- gsub("_stim_summary\\.rds", "_PLOT_Threshold_acc.png", summary_name)
+  PLOT_threshold_acc_name <- gsub("_param_summary\\.rds", "_PLOT_Threshold_acc.png", summary_name)
   
   ggsave(PLOT_threshold_acc_name, plot = PLOT_threshold_acc, path = "Analyses/Plots")
   
@@ -261,9 +261,9 @@ plot_parameters <- function(param_sum_path) {
       colour = "Threshold:Collapse Rate"
     )
   
-  PLOT_threshold_rt_name <- gsub("_stim_summary\\.rds", "_PLOT_Threshold_rt.png", summary_name)
+  PLOT_threshold_rt_name <- gsub("_param_summary\\.rds", "_PLOT_Threshold_rt.png", summary_name)
   
-  ggsave(PLOT_threshold_rt_name, plot = PLOT_threshold_art, path = "Analyses/Plots")
+  ggsave(PLOT_threshold_rt_name, plot = PLOT_rt_thresholds, path = "Analyses/Plots")
 }
 
 # Execute Functions -----------------------------------------

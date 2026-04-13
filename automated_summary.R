@@ -20,12 +20,12 @@ compute_summary_stats <- function(df) {
       count_none = replace_na(count_none, 0),
       mean_rt_correct = replace_na(mean_rt_correct, 0),
       mean_rt_incorrect = replace_na(mean_rt_incorrect, 0),
-      total_count = count_correct + count_incorrect + count_none,
+      total_count = sum(count_correct, count_incorrect, count_none, na.rm = TRUE),
       accuracy = as.numeric(count_correct / (total_count)),
       mean_rt = (mean_rt_correct * (count_correct / total_count)) +
         (mean_rt_incorrect * (count_incorrect / total_count))
     )
-  return(df)
+  return()
 }
 
 # Define Summary function ---------------------------------------------------
@@ -56,8 +56,19 @@ create_summaries <- function(rds_path) {
     pivot_wider(
       names_from = Resp,
       values_from = c(count, mean_rt)
-    ) |>
-    compute_summary_stats()
+    ) %>%
+    mutate(
+      count_none = if ("count_none" %in% names(.)) count_none else NA, # Need this because in some simulations it always reaches an answer. Stops errors being thrown.
+      count_correct = replace_na(count_correct, 0),
+      count_incorrect = replace_na(count_incorrect, 0),
+      count_none = replace_na(count_none, 0),
+      mean_rt_correct = replace_na(mean_rt_correct, 0),
+      mean_rt_incorrect = replace_na(mean_rt_incorrect, 0),
+      total_count = sum(count_correct, count_incorrect, count_none, na.rm = TRUE),
+      accuracy = as.numeric(count_correct / (total_count)),
+      mean_rt = (mean_rt_correct * (count_correct / total_count)) +
+        (mean_rt_incorrect * (count_incorrect / total_count))
+    )
   ### Save stimuli summary as an RDS file, at this location, under this name,
   saveRDS(stimuli_summary, file = file.path("Analyses/Summaries", stim_summary_filename))
 
@@ -108,8 +119,19 @@ create_summaries <- function(rds_path) {
     pivot_wider(
       names_from = Resp,
       values_from = c(count, mean_rt)
-    ) |>
-    compute_summary_stats()
+    ) %>%
+    mutate(
+      count_none = if ("count_none" %in% names(.)) count_none else NA, # Need this because in some simulations it always reaches an answer. Stops errors being thrown.
+      count_correct = replace_na(count_correct, 0),
+      count_incorrect = replace_na(count_incorrect, 0),
+      count_none = replace_na(count_none, 0),
+      mean_rt_correct = replace_na(mean_rt_correct, 0),
+      mean_rt_incorrect = replace_na(mean_rt_incorrect, 0),
+      total_count = sum(count_correct, count_incorrect, count_none, na.rm = TRUE),
+      accuracy = as.numeric(count_correct / (total_count)),
+      mean_rt = (mean_rt_correct * (count_correct / total_count)) +
+        (mean_rt_incorrect * (count_incorrect / total_count))
+    )
   #### Save Parameter Summary
   saveRDS(parameter_summary, file = file.path("Analyses/Summaries", param_summary_filename))
 }
