@@ -30,24 +30,24 @@ stimuli_data <- sim_data |>
       Resp == 1 ~ "correct",
       Resp == 2 ~ "incorrect"
     ),
-    across(c(Resp, DIFF), as.factor)
+    across(c(Resp, DIFF), as.factor) # Helps with visualisations.
   ) |>
-  group_by(OV, DIFF, Resp) |>
+  group_by(OV, DIFF, Resp) |> # Will result in averages over all data sharing these variables
   summarise(
-    count = n(),
+    count = n(), # needed to calculate averages
     mean_rt = mean(Time)
   ) |>
   pivot_wider(
     names_from = Resp,
-    values_from = c(count, mean_rt)
+    values_from = c(count, mean_rt) # Will create columns for both these variables
   ) |>
   mutate(
     total_count = count_correct + count_incorrect,
     accuracy = as.numeric(count_correct / (count_correct + count_incorrect)),
     mean_rt = (mean_rt_correct * (count_correct / total_count)) +
-      (mean_rt_incorrect * (count_incorrect / total_count))
+      (mean_rt_incorrect * (count_incorrect / total_count)) # Weighted mean
   )
-## Accuracy Plots ------------------------------------------------------------------
+## Accuracy Plot ------------------------------------------------------------------
 PLOT_acc <-
   ggplot(data = stimuli_data, aes(x = OV, y = accuracy, colour = DIFF)) +
   geom_smooth(method = "loess") +
@@ -101,7 +101,7 @@ PLOT_mcrt <-
   )
 
 PLOT_mcrt
-### Mean Error Response Time
+### Mean Error Response Time ----
 PLOT_mert <-
   ggplot(data = stimuli_data, aes(x = OV, y = mean_rt_incorrect, colour = DIFF)) +
   geom_smooth(method = "loess") +
@@ -118,21 +118,21 @@ PLOT_mert <-
 
 PLOT_mert
 # Parameter Data ---------------------------------------------------------------
-level_labels <- c("low", "med", "high")
+level_labels <- c("low", "med", "high") # Can be used for most parameters
 
-diff_labels <- c("difficult", "medium", "easy")
+diff_labels <- c("difficult", "medium", "easy") # How easy is it to make the choice, higher difference is easier
 
-OV_breaks <- c(seq(min(sim_data$OV), max(sim_data$OV), length.out = 3), Inf)
+OV_breaks <- c(seq(min(sim_data$OV), max(sim_data$OV), length.out = 4)) # Makes a sequence of 4 between the min and max values
 
-diff_breaks <- c(seq(min(sim_data$DIFF), max(sim_data$DIFF), length.out = 3), Inf)
+diff_breaks <- c(seq(min(sim_data$DIFF), max(sim_data$DIFF), length.out = 4))
 
-threshold_breaks <- c(seq(min(sim_data$a.intercept), max(sim_data$a.intercept), length.out = 3), Inf)
+threshold_breaks <- c(seq(min(sim_data$a.intercept), max(sim_data$a.intercept), length.out = 4))
 
-slope_breaks <- c(seq(min(sim_data$a.slope), max(sim_data$a.slope), length.out = 3), Inf)
+slope_breaks <- c(seq(min(sim_data$a.slope), max(sim_data$a.slope), length.out = 4))
 
-beta_breaks <- c(seq(min(sim_data$beta), max(sim_data$beta), length.out = 3), Inf)
+beta_breaks <- c(seq(min(sim_data$beta), max(sim_data$beta), length.out = 4))
 
-lambda_breaks <- c(seq(min(sim_data$lambda), max(sim_data$lambda), length.out = 3), Inf)
+lambda_breaks <- c(seq(min(sim_data$lambda), max(sim_data$lambda), length.out = 4))
 
 parameter_data <- sim_data |>
   mutate(
@@ -140,20 +140,19 @@ parameter_data <- sim_data |>
       Resp == 1 ~ "correct",
       Resp == 2 ~ "incorrect"
     ),
-    OV_level = cut(OV, breaks = OV_breaks, labels = level_labels, ordered_result = TRUE, right = FALSE),
+    #                                                             Keeps the order       Includes Lowest value   Closed on the right side of the sequence (cant go higher)
+    OV_level = cut(OV, breaks = OV_breaks, labels = level_labels, ordered_result = TRUE, include.lowest = TRUE, right = TRUE),
     diff_level = case_when(
-      DIFF == 0 ~ "equal",
-      TRUE ~ as.character(cut(DIFF, breaks = diff_breaks, labels = diff_labels, ordered_result = TRUE, right = FALSE))
+      DIFF == 0 ~ "equal", # Special case that needs excluding.
+      TRUE ~ as.character(cut(DIFF, breaks = diff_breaks, labels = diff_labels, ordered_result = TRUE, include.lowest = TRUE, right = TRUE))
     ) |>
       factor(levels = c("equal", diff_labels), ordered = TRUE),
-    threshold_level = cut(a.intercept, breaks = threshold_breaks, labels = level_labels, ordered_result = TRUE, right = FALSE),
-    collapse_rate = cut(a.slope, breaks = slope_breaks, labels = level_labels, ordered_result = TRUE, right = FALSE),
-    beta_level = cut(beta, breaks = beta_breaks, labels = level_labels, ordered_result = TRUE, right = FALSE),
-    lambda_level = cut(lambda, breaks = lambda_breaks, labels = level_labels, ordered_result = TRUE, right = FALSE),
+    threshold_level = cut(a.intercept, breaks = threshold_breaks, labels = level_labels, ordered_result = TRUE, include.lowest = TRUE, right = TRUE),
+    collapse_rate = cut(a.slope, breaks = slope_breaks, labels = level_labels, ordered_result = TRUE, include.lowest = TRUE, right = TRUE),
+    beta_level = cut(beta, breaks = beta_breaks, labels = level_labels, ordered_result = TRUE, include.lowest = TRUE, right = TRUE),
+    lambda_level = cut(lambda, breaks = lambda_breaks, labels = level_labels, ordered_result = TRUE, include.lowest = TRUE, right = TRUE),
     across(c(Resp, DIFF), as.factor)
-  )
-
-beta_lambda_data <- parameter_data |>
+  ) |>
   group_by(beta_level, lambda_level, OV, OV_level, diff_level, threshold_level, collapse_rate, Resp) |>
   summarise(
     count = n(),
@@ -167,19 +166,18 @@ beta_lambda_data <- parameter_data |>
     total_count = count_correct + count_incorrect,
     mean_rt = (mean_rt_correct * (count_correct / total_count)) +
       (mean_rt_incorrect * (count_incorrect / total_count)),
-    accuracy = as.numeric(count_correct / (count_correct + count_incorrect)),
-    ratio = as.numeric(mean_rt / accuracy)
+    accuracy = as.numeric(count_correct / (count_correct + count_incorrect))
   )
 
 ## Lambda:Beta Plots ---------------------------------------------------------------
-
+### Lambda:Beta Accuracy -----
 PLOT_acc_beta_lambda <-
-  ggplot(beta_lambda_data, aes(x = OV, y = accuracy, colour = beta_level:lambda_level)) +
-  geom_smooth(method = "loess",
-              se = FALSE) +
+  ggplot(parameter_data, aes(x = OV, y = accuracy, colour = beta_level:lambda_level)) +
+  geom_smooth(method = "loess", # Use polynomial regression
+              se = FALSE) + # Remove Standard Error Lines
   facet_wrap(~diff_level,
-    axes = "all",
-    labeller = as_labeller(
+    axes = "all", # Give each plot its own axis labels
+    labeller = as_labeller( # change facets labels 
       c(
         equal = "Equal Values",
         difficult = "Difficult (Close Values)",
@@ -204,8 +202,9 @@ PLOT_acc_beta_lambda <-
 
 PLOT_acc_beta_lambda
 
+### Lambda:Beta Response Time ----
 PLOT_rt_beta_lambda <-
-  ggplot(beta_lambda_data, aes(x = OV, y = mean_rt, colour = beta_level:lambda_level)) +
+  ggplot(parameter_data, aes(x = OV, y = mean_rt, colour = beta_level:lambda_level)) +
   geom_smooth(method = "loess",
               se = FALSE) +
   facet_wrap(~diff_level,
@@ -236,15 +235,16 @@ PLOT_rt_beta_lambda
 
 ## Threshold Plots----
 
+### Threshold Accuracy ----
 PLOT_acc_thresholds <-
-  ggplot(data = beta_lambda_data, aes(x = OV, y = accuracy, colour = threshold_level:collapse_rate)) +
+  ggplot(data = parameter_data, aes(x = OV, y = accuracy, colour = threshold_level:collapse_rate)) +
   geom_smooth(
     method = "loess",
     se = FALSE
   ) +
   facet_grid(
-    rows = vars(beta_level),
-    cols = vars(lambda_level),
+    rows = vars(beta_level), # Rows represent inhibition levels
+    cols = vars(lambda_level),# Cols Represent Leak levels
     scales = "fixed",
     axes = "all",
     labeller = labeller(.rows = as_labeller(
@@ -277,8 +277,9 @@ PLOT_acc_thresholds <-
 
 PLOT_acc_thresholds
 
+### Threshold Response Time ----
 PLOT_rt_thresholds <-
-  ggplot(data = beta_lambda_data, aes(x = OV, y = mean_rt, colour = threshold_level:collapse_rate)) +
+  ggplot(data = parameter_data, aes(x = OV, y = mean_rt, colour = threshold_level:collapse_rate)) +
   geom_smooth(
     method = "loess",
     se = FALSE
