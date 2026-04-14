@@ -18,3 +18,4 @@ Simulations/**
 
 # Ignore Analyses/Data 
 Analyses/Data/**
+.Rproj.user
